@@ -8,3 +8,6 @@ Single-Image Password:
 The single-image password takes an image input instead of a string input. The image is then dissected server-side for its key features, formed into a long string, hashed for a uniform length, and then transferred to the database server to be hashed again.
 
 The authentication system is experimental; thus testing and caution are advised.
+
+SETUP:
+An SQL database must be created in order for this to work, on the web server of your choice. In the example, a database with name "master-database" with table "login_table" and rows "id, username, password" were used. Copying these details will result in the database and code working immediately.
