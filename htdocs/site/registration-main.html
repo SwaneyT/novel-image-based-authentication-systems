@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="login2-styling.css">
+</head>
+<body>
+    <div id="main-panel">
+        <h1 class="h1-login">Registration</h1>
+
+        <ul class="passwordinput-dropdown">
+            <li class="passwordinput-firstbox"><a class="passwordinput-firstbox">Change Registration Method</a>
+            <ul class="passwordinput">
+                <li><a href="#" onclick="changePasswordMethod('text')">Text Password</a></li>
+                <li><a href="#" onclick="changePasswordMethod('imageSequence')">Image Sequence</a></li>
+                <li><a href="#" onclick="changePasswordMethod('singleImage')">Single Image Sign-in</a></li>
+            </ul>
+        </ul>
+
+        <form id="userpass-input" action="login.php" method="post">
+            <input type="text" placeholder="Username..." name="username" required="required" id="userInput" value="">
+            <input type="password" placeholder="Password..." name="password" required="required" class="tempMethod" value="">
+            <button type="button" id="submitLoginButton" onclick="submitRegister()">Submit Registration</button>
+            <a id="register-login-button" href="login-main.html">Go to sign-in!</a>
+            <span id="attemptMessage"></span>
+            <a href="login-main.html" id="go-to-login" style="display: none;">Go To Login!</a>
+        </form>
+
+    </div>
+
+    <script>
+
+        const button_images = [
+            'button_images/giraffe.jpg',
+            'button_images/dog.png',
+            'button_images/tree.png',
+            'button_images/cat.png',
+            'button_images/rhino.png',
+            'button_images/traffic-cones.png',
+            'button_images/watch.png',
+            'button_images/bush.png',
+            'button_images/car.png'
+        ];
+
+        const button_ids = [
+            'giraffe',
+            'dog',
+            'tree',
+            'cat',
+            'rhino',
+            'traffic-cones',
+            'watch',
+            'bush',
+            'car'
+        ]
+
+        var password_string = [];
+        var inputMethod = "text";
+
+        function setGlobalVariable(value) {
+            inputMethod = value;
+        }
+
+        const form = document.getElementById("userpass-input");
+
+        form.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Prevent default form submission
+            submitRegister();
+        }
+        });
+
+
+        function checkLoginStatus() {
+          // Send AJAX request to check login status
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', 'check_login.php', true);
+          xhr.onload = function() {
+            if (xhr.status === 200) {
+              const response = JSON.parse(xhr.responseText);
+              if (response.isLoggedIn) {
+                // User is logged in, display welcome message and user information
+                console.log("Already logged in as " + response.username + "... Redirect??????")
+                // ... (show additional user information based on response data)
+              }}}
+          xhr.send();
+        }
+
+        function changePasswordMethod(inputMethod){
+            /*Delete current password input (with class tempMethod), then replace it with whatever inputMethod says*/
+            const userPassForm = document.getElementById('userpass-input');
+            const currentPasswordInput = document.getElementsByClassName("tempMethod");
+                while(currentPasswordInput.length > 0){
+                    currentPasswordInput[0].parentNode.removeChild(currentPasswordInput[0]);
+                }
+            
+            if (inputMethod == "text"){
+                newInputMethod = document.createElement("input");
+                newInputMethod.setAttribute("placeholder","Password... Cloned");
+                newInputMethod.setAttribute("name","password");
+                newInputMethod.setAttribute("type","password")
+                newInputMethod.setAttribute("required","required");
+                newInputMethod.setAttribute("class","tempMethod");
+                newInputMethod.setAttribute("value","");
+                submitLoginButton = document.getElementById("submitLoginButton")
+                userPassForm.insertBefore(newInputMethod,submitLoginButton);
+                console.log(newInputMethod);
+            }
+
+            if (inputMethod == "imageSequence"){
+                /*Create a CSS grid in 3x3 (scalable) through a loop*/
+                /*Inside the loop creating the grid, apply all classes and styling to each piece there*/
+                /*Apply each image to each button inside the loop, which is taken from an array, which is taken from a specific folder in local files*/
+                gridItems=[]
+                gridContainerDiv = document.createElement("div");
+                gridContainerDiv.setAttribute("id","grid-container")
+                gridContainerDiv.setAttribute("class","tempMethod")
+                for(var i = 0; i < 9; ++i){
+                    console.log(i)
+                    gridItem = document.createElement("div");
+                    gridItem.setAttribute("class","grid-item");
+
+                    gridButton = document.createElement("button");
+                    gridButton.setAttribute("type","button")
+                    gridButton.setAttribute("class","full-button fit-image")
+                    gridButton.setAttribute("style",`background-image: url(${button_images[i]});`)
+                    gridButton.setAttribute("id",`${button_ids[i]}`)
+
+                    gridItem.appendChild(gridButton)
+                    gridContainerDiv.appendChild(gridItem)
+
+                    gridItems.push(gridItem)
+                    console.log(gridItems)
+                }
+
+                userPassForm.insertBefore(gridContainerDiv,submitLoginButton);
+
+                var all_buttons = document.querySelectorAll(".full-button")
+                console.log(all_buttons)
+                
+
+                for(var i = 0; i < all_buttons.length; ++i){
+                    console.log(i)
+                    console.log(all_buttons[i])
+
+                    
+                    all_buttons[i].addEventListener('click', function(click){
+                        console.log(i);
+                        console.log(click.target.id);
+                        // alert(click.target.id)
+                        click.target.style.opacity = 0.7;
+                        click.target.style.filter = "alpha(opacity=70)";
+                        click.target.parentNode.style.borderColor = "blue";
+                        if (password_string.includes(click.target.id) == false){
+                            password_string.push(click.target.id);
+                            click.target.innerHTML = password_string.length
+                        }
+                        else{
+                            console.log("Used already. Not Appending");
+                        }
+                        console.log(password_string);
+                    })
+                }
+
+            console.log(inputMethod)
+            resetSequence()
+            }
+            if (inputMethod == 'singleImage'){
+                newInputMethod = document.createElement("input");
+                newInputMethod.setAttribute("placeholder","Upload Password Image");
+                newInputMethod.setAttribute("id","password-image-input");
+                newInputMethod.setAttribute("type","file")
+                newInputMethod.setAttribute("required","required");
+                newInputMethod.setAttribute("class","tempMethod");
+                newInputMethod.setAttribute("accept","image/png, image/jpeg, image/jpg");
+                submitLoginButton = document.getElementById("submitLoginButton");
+                userPassForm.insertBefore(newInputMethod,submitLoginButton);
+                console.log(newInputMethod);
+            }
+        setGlobalVariable(inputMethod)
+        }
+
+    
+    function resetSequence(){
+        var all_buttons = document.querySelectorAll(".full-button")
+        password_string = [];
+        for(var i = 0; i < all_buttons.length; ++i){
+            all_buttons[i].style.opacity = 1;
+            all_buttons[i].parentNode.style.borderColor = "black";
+            all_buttons[i].innerHTML = "";
+        };
+        console.log("Sequence and Styling Reset...");
+    }
+
+    function combineImagePassword(){
+        var plain_password = ""
+        for(var i = 0; i < password_string.length; ++i){
+            var extra = "-"
+            // plain_password = plain_password.concat(password_string[i] + "-")
+            if(i+1 == password_string.length){
+                extra = ""
+            }
+            plain_password = plain_password.concat(password_string[i] + extra);
+        }
+        console.log("Formed password:" + plain_password);
+        //resetSequence()
+        return plain_password;
+    }
+
+    function register(username,password){
+        fetch("register.php", {
+            method: "POST",
+            body: new URLSearchParams({
+                username: username,
+                password: password
+            })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const attemptMessage = document.getElementById("attemptMessage");
+                if (data.status === "success") {
+                // Redirect to dashboard or other page for logged-in users
+                //window.location.href = "dashboard.html";
+                console.log(data.status)
+                attemptMessage.textContent = "Successfully Registered!";
+                attemptMessage.style.display = "block"; // Ensure visibility
+                const go_to_login_button = document.getElementById("go-to-login")
+                go_to_login_button.setAttribute("style","display:visible;text-align:center;")
+            } else if(data.status === "fail" && data.error === "This username is already taken."){
+                attemptMessage.textContent = "Username taken.";
+                attemptMessage.style.display = "block"; // Ensure visibility
+            } else {
+                // Handle invalid credentials
+                if (username == "" || password == "") {
+                    attemptMessage.textContent = "Missing Details!";
+                } else{
+                console.log(data.status)
+                attemptMessage.textContent = "Incorrect Details";
+                attemptMessage.style.display = "block"; // Ensure visibility
+                }
+            }
+            })
+            .catch(error => {
+            // Handle errors here
+            });
+
+    }
+
+    function submitRegister() {
+            if (inputMethod == 'imageSequence') { // Check if image selection is enabled
+                if (password_string.length >= 5){
+
+                image_plain_password = combineImagePassword();
+
+                // Extract username from the form
+                const username = document.getElementById("userpass-input").username.value;
+
+                // Construct POST request with username and image_plain_password
+                register(username,image_plain_password)
+
+                resetSequence();
+            } else{
+                const attemptMessage = document.getElementById("attemptMessage");
+                attemptMessage.textContent = "Please select 5 or more images.";
+                attemptMessage.style.display = "block"; // Ensure visibility
+            }
+
+            } if (inputMethod == 'text') {
+                
+                const username = document.getElementById("userpass-input").username.value;
+                const password = document.getElementById("userpass-input").password.value;
+                
+                register(username,password)
+            }
+
+            if (inputMethod == 'singleImage'){
+                if(document.getElementById("password-image-input").files[0]){
+                    // if there's a file uploaded continue
+                    uploaded_file = document.getElementById("password-image-input").files[0];
+                    const username = document.getElementById("userpass-input").username.value;
+                    const attemptMessage = document.getElementById("attemptMessage");
+                    // Create a FormData object
+                    const formData = new FormData();
+                    formData.append("photo", uploaded_file);
+                    formData.append("test", username);
+                    formData.append("test2","image-method")
+                    console.log(formData);
+
+                    // Send the request using fetch
+                    fetch("register.php", {
+                        method: "POST",
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data)
+                        if (data.status == "success"){
+                            attemptMessage.textContent = "Successfully registered!";
+                            attemptMessage.style.display = "block"; // Ensure visibility
+                        } else if (data.status == "fail" && data.error == "This username is already taken."){
+                            attemptMessage.textContent = "Username is taken.";
+                            attemptMessage.style.display = "block"; // Ensure visibility
+                        } else {
+                            attemptMessage.textContent = "Error.";
+                            attemptMessage.style.display = "block"; // Ensure visibility
+                        }
+                        
+                    })
+                } else {
+                    attemptMessage.textContent = "Please attach an image!";
+                    attemptMessage.style.display = "block"; // Ensure visibility
+                }
+            }
+
+            // Proceed with form submission if image selection was active
+            //document.getElementById("userpass-input").submit();
+    }
+
+
+    checkLoginStatus()
+
+    </script>
+</body>
+</html>

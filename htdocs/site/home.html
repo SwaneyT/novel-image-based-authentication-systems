@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- <link rel="stylesheet" href="login2-styling.css"> -->
+</head>
+<body>
+    <h1 id="login-status"></h1>
+    <a id="login-link" href="login-main.html" style="visibility: hidden;display:none;">Login Here</a>
+    <a id="logout" href="home.html" style="visibility: hidden;display:none;" onclick="logout()">Logout</a>
+
+
+
+    <script>
+        function checkLoginStatus() {
+          // Send AJAX request to check login status
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', 'check_login.php', true);
+          xhr.onload = function() {
+            if (xhr.status === 200) {
+              const response = JSON.parse(xhr.responseText);
+              if (response.isLoggedIn) {
+                // User is logged in, display welcome message and user information
+                console.log(response)
+                document.getElementById('login-status').innerHTML = 'Welcome back, ' + response.username + ' (user ID ' + response.userID + ')';
+                document.getElementById('logout').style="visibility: visible;"
+                // ... (show additional user information based on response data)
+              } else {
+                // User is not logged in, display message or redirect
+                document.getElementById('login-status').innerHTML = 'Please log in.';
+                document.getElementById('login-link').style = "visiblity: visible;"
+              }
+            } else {
+              // Handle error
+              console.error('Error checking login status:', xhr.statusText);
+            }
+          };
+          xhr.send();
+        }
+
+        function logout(){
+          console.log("Logging out...")
+          fetch("end_session.php", {
+            method: "POST"
+        })
+      }
+
+        checkLoginStatus()
+      </script>
+</body>
+</html>
